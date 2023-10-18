@@ -13,12 +13,13 @@
                 "${workspaceFolder}\\deps\\GLEW\\lib\\glew32.lib",
                 "${workspaceFolder}\\deps\\GLFW\\lib\\libglfw3.a",
                 "-lOpenGL32",
-                "-lgdi32",  // <-- Add this
-                "-luser32", // <-- Add this
-                "-lkernel32", // <-- Add this
+                "-lgdi32",
+                "-luser32",
+                "-lkernel32",
                 "-I${workspaceFolder}\\include",
                 "-I${workspaceFolder}\\deps\\GLEW\\include",
-                "-I${workspaceFolder}\\deps\\GLFW\\include"
+                "-I${workspaceFolder}\\deps\\GLFW\\include",
+                "-I${workspaceFolder}\\include\\"
             ],
             "group": {
                 "kind": "build",

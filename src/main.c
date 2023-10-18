@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "../include/params.h"
+#include "../include/gfx/gfx.h"
+
+static Skeleton skeleton;
+static Skeleton *s = &skeleton;
 
 //Entry Point
 int main()
@@ -12,16 +17,16 @@ int main()
     }
 
     //Create Main OpenGL GLFW Window
-    GLFWwindow* window = glfwCreateWindow(640, 480, "Hello World!", NULL, NULL);
+    createWindow();
 
-    if(!window)
+    if(!s->window)
     {
         printf("Failed to create window.");
         glfwTerminate();
         return -1;
     }
 
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(s->window);
 
     //Start GL Wrapper
     GLenum error = glewInit();
@@ -33,12 +38,21 @@ int main()
     }
     
     //Buffer Loop
-    while(!glfwWindowShouldClose(window))
+    while(!glfwWindowShouldClose(s->window))
     {
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(s->window);
         glfwPollEvents();
     }
 
     glfwTerminate();
     return 0;
+}
+
+void createWindow()
+{
+    int window_width = WINDOW_WIDTH;
+    int window_height = WINDOW_HEIGHT;
+    char window_title[] = WINDOW_TITLE;
+
+    s->window = glfwCreateWindow(window_width, window_height, window_title, NULL, NULL);
 }
