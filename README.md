@@ -1,5 +1,5 @@
 # opengl-c-renderer
  OpenGL renderer in 100% C
  
-#Attributions
+##Attributions
 https://learnopengl.com/book/book_pdf.pdf
