@@ -69,34 +69,51 @@ int main()
     //Bind buffer callback so viewport resizes with window
     glfwSetFramebufferSizeCallback(s->window, framebuffer_size_callback);
     
+    //Vertex Buffer Object
     unsigned int VBO;
     glGenBuffers(1, &VBO);
+    //Vertex Array Object
+    unsigned int VAO;
+    glGenVertexArrays(1, &VAO);
+
     glBindBuffer(GL_ARRAY_BUFFER, &VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindVertexArray(VAO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     //Shaders
     GLuint vertex_shader = compile_vertex_shader("shaders/vertex_shader.glsl");
     GLuint fragment_shader = compile_fragment_shader("shaders/fragment_shader.glsl");
+
+
     GLuint shader_program = create_shader_program(vertex_shader, fragment_shader);
     glUseProgram(shader_program);
+    
     //Delete shaders now that they've been linked to the program
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
+
+    
 
     //Buffer Loop
     while(!glfwWindowShouldClose(s->window))
     {
         processInput(s->window);
         //Render Commands
-        glClearColor(255, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT);
+        glClearColor(1, 0, 0, 0);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        
         //
         glfwSwapBuffers(s->window);
         glfwPollEvents();
     }
 
-    //glfwTerminate();
-    //return 0;
+    glfwTerminate();
+    return 0;
 }
 
 void processInput(GLFWwindow* window)
