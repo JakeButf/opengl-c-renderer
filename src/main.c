@@ -96,7 +96,7 @@ int main()
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3* sizeof(float)));
     glEnableVertexAttribArray(1);
-    
+
     unsigned int EBO;
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -106,15 +106,12 @@ int main()
     GLuint vertex_shader = compile_vertex_shader("shaders/vertex_shader.glsl");
     GLuint fragment_shader = compile_fragment_shader("shaders/fragment_shader.glsl");
 
-
     GLuint shader_program = create_shader_program(vertex_shader, fragment_shader);
     glUseProgram(shader_program);
     
     //Delete shaders now that they've been linked to the program
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
-
-    
 
     //Buffer Loop
     while(!glfwWindowShouldClose(s->window))
