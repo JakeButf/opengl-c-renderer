@@ -8,9 +8,15 @@ static Skeleton skeleton;
 static Skeleton *s = &skeleton;
 //TEMP
 float vertices[] = {
--0.5f, -0.5f, 0.0f,
-0.5f, -0.5f, 0.0f,
-0.0f, 0.5f, 0.0f
+0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+-0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f
+};
+
+unsigned int indices[] = {
+    0, 1, 3,
+    1, 2, 3
 };
 //
 
@@ -30,6 +36,11 @@ void createWindow()
     //These variables may not always need to be the window size, this may be changed.
     s->width = window_width;
     s->height = window_height;
+
+    if(WIREFRAME)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
 }
 
 //Entry Point
@@ -80,8 +91,16 @@ int main()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glBindVertexArray(VAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3* sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     //Shaders
     GLuint vertex_shader = compile_vertex_shader("shaders/vertex_shader.glsl");
@@ -103,10 +122,15 @@ int main()
         processInput(s->window);
         //Render Commands
         glClear(GL_COLOR_BUFFER_BIT);
-        glClearColor(1, 0, 0, 0);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        
+        glClearColor(0, 0, 0, 0);
+
+        float time = glfwGetTime();
+        float green = sin(time) / 2.0f + 0.5f;
+        int vertexColorLocation = glGetUniformLocation(shader_program, "vertexColor");
+        glUniform4f(vertexColorLocation, 0.0f, green, 0.0f, 1.0f);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         //
         glfwSwapBuffers(s->window);
         glfwPollEvents();
