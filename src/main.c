@@ -4,29 +4,19 @@
 #include "../include/params.h"
 #include "../include/gfx/gfx.h"
 #include "../include/gfx/window.h"
+#include "../include/gfx/model.h"
 #include "window.c";
 #include "cube.c";
+#include "model.c"
 
 #include <cglm.h>
 
-
-//TEMP
-float vertices[] = {
-0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
--0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
--0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f
-};
-
-unsigned int indices[] = {
-    0, 1, 3,
-    1, 2, 3
-};
-//
+mat4 globalProjectionMatrix;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+    glm_perspective(glm_rad(45.0f), (float)width / (float)height, 0.1f, 100.0f, globalProjectionMatrix);
 }
 
 //Entry Point
@@ -41,6 +31,7 @@ int main()
     //Create Main OpenGL GLFW Window
     InitWindow();
     create_window(w->skeleton);
+    
 
     if(!w->skeleton->window)
     {
@@ -66,28 +57,9 @@ int main()
     glViewport(0, 0, w->skeleton->width, w->skeleton->height);
     //Bind buffer callback so viewport resizes with window
     glfwSetFramebufferSizeCallback(w->skeleton->window, framebuffer_size_callback);
+    glm_perspective(glm_rad(45.0f), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f, globalProjectionMatrix);
     
-    //Vertex Buffer Object
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    //Vertex Array Object
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, &VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVerts), cubeVerts, GL_STATIC_DRAW);
-
-    glBindVertexArray(VAO);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (3* sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    unsigned int EBO;
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    Model* testModel = CreateModel(cubeVerts, sizeof(cubeVerts) / sizeof(float), cubeIndices, sizeof(cubeIndices) / sizeof(unsigned int));
 
     //Shaders
     GLuint vertex_shader = compile_vertex_shader("shaders/vertex_shader.glsl");
@@ -112,33 +84,31 @@ int main()
         glClearColor(SKYBOX_COLOR_R / 255.0f, SKYBOX_COLOR_G / 255.0f, SKYBOX_COLOR_B / 255.0f, SKYBOX_COLOR_A / 255.0f);
 
         float time = glfwGetTime();
-        float green = sin(time) / 2.0f + 0.5f;
-        int vertexColorLocation = glGetUniformLocation(shader_program, "vertexColor");
-        glUniform4f(vertexColorLocation, 0.0f, green, 0.0f, 1.0f);
 
-        //Matrix Testing
-        mat4 model;
-        glm_mat4_identity(model);
         vec3 axis = {0.5f, 1.0f, 0.0f};
-        glm_rotate(model, (float)glfwGetTime() * glm_rad(50.0f), axis);
+        RotateModel(testModel, (float)glfwGetTime() * glm_rad(50.0f) * 100, axis);
+
+        mat4 modelMatrix;
+        GetModelMatrix(testModel, modelMatrix);
 
         unsigned int modelLoc = glGetUniformLocation(shader_program, "model");
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model[0]);
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelMatrix);
 
         unsigned int viewLoc = glGetUniformLocation(shader_program, "view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, w->view[0]);
 
         unsigned int projLoc = glGetUniformLocation(shader_program, "projection");
-        glUniformMatrix4fv(projLoc, 1, GL_FALSE, w->proj[0]);
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, globalProjectionMatrix);
+        
+        float green = sin(time) / 2.0f + 0.5f;
+        int vertexColorLocation = glGetUniformLocation(shader_program, "vertexColor");
+        glUniform4f(vertexColorLocation, 0.0f, green, 0.0f, 1.0f);
 
-        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        //
+        DrawModel(testModel);
+
         glfwSwapBuffers(w->skeleton->window);
         glfwPollEvents();
     }
-
     glfwTerminate();
     return 0;
 }

@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "cglm.h": "c"
+        "cglm.h": "c",
+        "params.h": "c"
     }
 }

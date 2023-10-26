@@ -17,5 +17,4 @@ void InitWindow()
     glm_translate_to(w->view, translation, w->view);
 
     //glOrtho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
-    glm_perspective(glm_rad(45.0f), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f, w->proj);
 }

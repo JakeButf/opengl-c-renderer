@@ -1,5 +1,6 @@
 #include "../include/gfx/gfx.h"
 #include "../include/params.h"
+#include "../include/gfx/window.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -138,3 +139,13 @@ void create_window(Skeleton* s)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 }
+
+/*void update_window(Window* w)
+{
+    int width, height;
+    glfwGetFramebufferSize(w->skeleton, &width, &height);
+    glViewport(0, 0, width, height);
+
+    mat4 projection;
+    glm_perspective(glm_rad(45.0f), (float)width / (float)height, 0.1f, 100.0f, projection);
+}*/
