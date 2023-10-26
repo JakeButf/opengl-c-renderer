@@ -5,6 +5,7 @@
 #include "../include/gfx/gfx.h"
 #include "../include/gfx/window.h"
 #include "window.c";
+#include "cube.c";
 
 #include <cglm.h>
 
@@ -60,7 +61,7 @@ int main()
         const GLubyte* version = glGetString(GL_VERSION);
         printf("OpenGL Version: %s\n", version);
     }
-
+    glEnable(GL_DEPTH_TEST);
     //TODO: Relocate window size variables 
     glViewport(0, 0, w->skeleton->width, w->skeleton->height);
     //Bind buffer callback so viewport resizes with window
@@ -74,13 +75,13 @@ int main()
     glGenVertexArrays(1, &VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, &VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVerts), cubeVerts, GL_STATIC_DRAW);
 
     glBindVertexArray(VAO);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3* sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (3* sizeof(float)));
     glEnableVertexAttribArray(1);
 
     unsigned int EBO;
@@ -99,15 +100,16 @@ int main()
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
 
-    
+    if(WIREFRAME)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     //Buffer Loop
     while(!glfwWindowShouldClose(w->skeleton->window))
     {
         processInput(w->skeleton->window);
         //Render Commands
-        glClear(GL_COLOR_BUFFER_BIT);
-        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(SKYBOX_COLOR_R / 255.0f, SKYBOX_COLOR_G / 255.0f, SKYBOX_COLOR_B / 255.0f, SKYBOX_COLOR_A / 255.0f);
 
         float time = glfwGetTime();
         float green = sin(time) / 2.0f + 0.5f;
@@ -115,18 +117,23 @@ int main()
         glUniform4f(vertexColorLocation, 0.0f, green, 0.0f, 1.0f);
 
         //Matrix Testing
-        mat4 trans;
-        glm_mat4_identity(trans);
-        vec3 axis = {0.0f, 0.0f, 1.0f};
-        glm_rotate(trans, (float)glfwGetTime(), axis);
-        vec3 scale = {0.5, 0.5, 0.5};
-        glm_scale(trans, scale);
+        mat4 model;
+        glm_mat4_identity(model);
+        vec3 axis = {0.5f, 1.0f, 0.0f};
+        glm_rotate(model, (float)glfwGetTime() * glm_rad(50.0f), axis);
 
-        unsigned int transformLoc = glGetUniformLocation(shader_program, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, trans[0]);
+        unsigned int modelLoc = glGetUniformLocation(shader_program, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model[0]);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        unsigned int viewLoc = glGetUniformLocation(shader_program, "view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, w->view[0]);
+
+        unsigned int projLoc = glGetUniformLocation(shader_program, "projection");
+        glUniformMatrix4fv(projLoc, 1, GL_FALSE, w->proj[0]);
+
+        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
         //
         glfwSwapBuffers(w->skeleton->window);
         glfwPollEvents();

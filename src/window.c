@@ -8,9 +8,14 @@ static Window *w = &window;
 
 void InitWindow()
 {
-    w->skeleton = &w->s;
-    glOrtho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
-    mat4 proj;
-    glm_perspective(glm_rad(45.0f), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f, proj);
 
+    w->skeleton = &w->s;
+
+    glm_mat4_identity(w->view);
+
+    vec3 translation = {0.0f, 0.0f, -3.0f};
+    glm_translate_to(w->view, translation, w->view);
+
+    //glOrtho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
+    glm_perspective(glm_rad(45.0f), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f, w->proj);
 }
