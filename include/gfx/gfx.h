@@ -17,4 +17,5 @@ GLuint compile_vertex_shader(const char* shaderSource);
 GLuint compile_fragment_shader(const char* shaderSource);
 GLuint create_shader_program(GLuint vertexShader, GLuint fragmentShader);
 char* loadShaderSource(const char* filepath);
+void create_window(Skeleton* s);
 #endif

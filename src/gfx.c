@@ -1,4 +1,5 @@
 #include "../include/gfx/gfx.h"
+#include "../include/params.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -118,4 +119,22 @@ char* loadShaderSource(const char* filepath)
 
     fclose(file);
     return source;
+}
+
+void create_window(Skeleton* s)
+{
+    int window_width = WINDOW_WIDTH;
+    int window_height = WINDOW_HEIGHT;
+    char window_title[] = WINDOW_TITLE;
+
+    s->window = glfwCreateWindow(window_width, window_height, window_title, NULL, NULL);
+
+    //These variables may not always need to be the window size, this may be changed.
+    s->width = window_width;
+    s->height = window_height;
+
+    if(WIREFRAME)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
 }

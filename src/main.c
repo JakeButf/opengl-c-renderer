@@ -3,9 +3,12 @@
 #include <GLFW/glfw3.h>
 #include "../include/params.h"
 #include "../include/gfx/gfx.h"
+#include "../include/gfx/window.h"
+#include "window.c";
 
-static Skeleton skeleton;
-static Skeleton *s = &skeleton;
+#include <cglm.h>
+
+
 //TEMP
 float vertices[] = {
 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
@@ -25,24 +28,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void createWindow()
-{
-    int window_width = WINDOW_WIDTH;
-    int window_height = WINDOW_HEIGHT;
-    char window_title[] = WINDOW_TITLE;
-
-    s->window = glfwCreateWindow(window_width, window_height, window_title, NULL, NULL);
-
-    //These variables may not always need to be the window size, this may be changed.
-    s->width = window_width;
-    s->height = window_height;
-
-    if(WIREFRAME)
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    }
-}
-
 //Entry Point
 int main()
 {
@@ -53,16 +38,17 @@ int main()
     }
 
     //Create Main OpenGL GLFW Window
-    createWindow();
+    InitWindow();
+    create_window(w->skeleton);
 
-    if(!s->window)
+    if(!w->skeleton->window)
     {
         printf("Failed to create window.");
         glfwTerminate();
         return -1;
     }
 
-    glfwMakeContextCurrent(s->window);
+    glfwMakeContextCurrent(w->skeleton->window);
 
     //Start GL Wrapper
     GLenum error = glewInit();
@@ -76,9 +62,9 @@ int main()
     }
 
     //TODO: Relocate window size variables 
-    glViewport(0, 0, s->width, s->height);
+    glViewport(0, 0, w->skeleton->width, w->skeleton->height);
     //Bind buffer callback so viewport resizes with window
-    glfwSetFramebufferSizeCallback(s->window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(w->skeleton->window, framebuffer_size_callback);
     
     //Vertex Buffer Object
     unsigned int VBO;
@@ -113,10 +99,12 @@ int main()
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
 
+    
+
     //Buffer Loop
-    while(!glfwWindowShouldClose(s->window))
+    while(!glfwWindowShouldClose(w->skeleton->window))
     {
-        processInput(s->window);
+        processInput(w->skeleton->window);
         //Render Commands
         glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(0, 0, 0, 0);
@@ -126,10 +114,21 @@ int main()
         int vertexColorLocation = glGetUniformLocation(shader_program, "vertexColor");
         glUniform4f(vertexColorLocation, 0.0f, green, 0.0f, 1.0f);
 
+        //Matrix Testing
+        mat4 trans;
+        glm_mat4_identity(trans);
+        vec3 axis = {0.0f, 0.0f, 1.0f};
+        glm_rotate(trans, (float)glfwGetTime(), axis);
+        vec3 scale = {0.5, 0.5, 0.5};
+        glm_scale(trans, scale);
+
+        unsigned int transformLoc = glGetUniformLocation(shader_program, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, trans[0]);
+
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         //
-        glfwSwapBuffers(s->window);
+        glfwSwapBuffers(w->skeleton->window);
         glfwPollEvents();
     }
 
