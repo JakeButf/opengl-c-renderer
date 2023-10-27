@@ -5,10 +5,11 @@
 #include "../include/gfx/gfx.h"
 #include "../include/gfx/window.h"
 #include "../include/gfx/model.h"
+#include "../include/gfx/chunk.h"
 #include "window.c"
-#include "cube.c"
 #include "model.c"
 #include "input.c"
+#include "chunk.c"
 
 #include <cglm.h>
 
@@ -60,10 +61,6 @@ int main()
     //Bind buffer callback so viewport resizes with window
     glfwSetFramebufferSizeCallback(w->skeleton->window, framebuffer_size_callback);
     glm_perspective(glm_rad(45.0f), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f, globalProjectionMatrix);
-    
-    Model* testModel = CreateModel(cubeVerts, sizeof(cubeVerts) / sizeof(float), cubeIndices, sizeof(cubeIndices) / sizeof(unsigned int));
-    Model* secondModel = CreateModel(cubeVerts, sizeof(cubeVerts) / sizeof(float), cubeIndices, sizeof(cubeIndices) / sizeof(unsigned int));
-    MoveModel(secondModel, (vec3){0, 1.0f, 0});
 
     //Shaders
     GLuint vertex_shader = compile_vertex_shader("shaders/vertex_shader.glsl");
@@ -82,6 +79,8 @@ int main()
     InitCamera(&camera, (vec3){0.0f, 0.0f, 3.0f});
     UpdateCameraVectors(&camera);
 
+    Chunk* testChunk = CreateChunk((vec3){0.0f, 0.0f,0.0f});
+    
     //Buffer Loop
     float lastFrame = 0.0f;
     while(!glfwWindowShouldClose(w->skeleton->window))
@@ -93,9 +92,6 @@ int main()
         //Render Commands
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(SKYBOX_COLOR_R / 255.0f, SKYBOX_COLOR_G / 255.0f, SKYBOX_COLOR_B / 255.0f, SKYBOX_COLOR_A / 255.0f);
-
-        vec3 axis = {0.5f, 1.0f, 0.0f};
-        RotateModel(testModel, (float)glfwGetTime() * glm_rad(50.0f) * 100, axis);
 
         mat4 viewMatrix;
         GetViewMatrix(camera, viewMatrix);
@@ -112,14 +108,14 @@ int main()
         int vertexColorLocation = glGetUniformLocation(shader_program, "vertexColor");
         glUniform4f(vertexColorLocation, 0.0f, green, 0.0f, 1.0f);
 
-        DrawModel(testModel, shader_program);
-        DrawModel(secondModel, shader_program);
+        //Draw Code Here
+        DrawChunk(testChunk, shader_program);
+        //
 
         glfwSwapBuffers(w->skeleton->window);
         glfwPollEvents();
     }
-    FreeModel(testModel);
-    FreeModel(secondModel);
+    FreeChunk(testChunk);
     glfwTerminate();
     return 0;
 }

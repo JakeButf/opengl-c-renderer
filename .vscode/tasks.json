@@ -21,6 +21,7 @@
                 "-I${workspaceFolder}\\deps\\GLEW\\include",
                 "-I${workspaceFolder}\\deps\\GLFW\\include",
                 "-I${workspaceFolder}\\deps\\cglm",
+                "-I${workspaceFolder}\\deps",
                 "-I${workspaceFolder}\\include\\",
                 "-I${workspaceFolder}\\include\\gfx"
             ],

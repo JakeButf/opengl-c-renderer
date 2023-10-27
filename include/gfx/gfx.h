@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "chunk.h"
 
 typedef struct {
     GLFWwindow *window;
@@ -18,5 +19,6 @@ GLuint compile_fragment_shader(const char* shaderSource);
 GLuint create_shader_program(GLuint vertexShader, GLuint fragmentShader);
 char* loadShaderSource(const char* filepath);
 void create_window(Skeleton* s);
+
 //void update_window(Window* w);
 #endif

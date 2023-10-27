@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}\\deps\\GLEW\\include",
                 "${workspaceFolder}\\deps\\GLFW\\include",
-                "${workspaceFolder}\\deps\\cglm\\"
+                "${workspaceFolder}\\deps\\cglm\\",
+                "${workspaceFolder}\\deps"
             ],
             "defines": [
                 "_DEBUG",
