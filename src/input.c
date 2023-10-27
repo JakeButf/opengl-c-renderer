@@ -79,8 +79,20 @@ void processInput(GLFWwindow* window, float deltaTime)
     float cameraSpeed = camera.speed * deltaTime; // deltaTime should be time between current frame and last frame
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
-        glfwSetInputMode(w->skeleton->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        w->focused = false;
+        if(w->focused)
+        {
+            glfwSetInputMode(w->skeleton->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            w->focused = false;
+        }
+    }
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
+    {
+        //TODO check if click is over window
+        if(!w->focused)
+        {
+            w->focused = true;
+            glfwSetInputMode(w->skeleton->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
     }
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {

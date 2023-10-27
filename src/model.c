@@ -56,8 +56,11 @@ Model* CreateModel(const float* vertices, size_t vertexCount, const unsigned int
     return model;
 }
 
-void DrawModel(const Model* model)
+void DrawModel(const Model* model, GLuint shader_program)
 {
+    GetModelMatrix(model);
+    unsigned int modelLoc = glGetUniformLocation(shader_program, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model->modelMatrix);
     glBindVertexArray(model->VAO);
     glDrawElements(GL_TRIANGLES, model->indexCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
@@ -89,10 +92,10 @@ void ScaleModel(Model* model, vec3 scale)
     glm_scale_make(model->scaleMatrix, scale);
 }
 
-void GetModelMatrix(Model* model, mat4 dest)
+void GetModelMatrix(Model* model)
 {
-    glm_mat4_identity(dest);
-    glm_mat4_mul(dest, model->translateMatrix, dest);
-    glm_mat4_mul(dest, model->rotateMatrix, dest);
-    glm_mat4_mul(dest, model->scaleMatrix, dest);
+    glm_mat4_identity(model->modelMatrix);
+    glm_mat4_mul(model->modelMatrix, model->translateMatrix, model->modelMatrix);
+    glm_mat4_mul(model->modelMatrix, model->rotateMatrix, model->modelMatrix);
+    glm_mat4_mul(model->modelMatrix, model->scaleMatrix, model->modelMatrix);
 }

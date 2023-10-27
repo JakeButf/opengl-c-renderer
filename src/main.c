@@ -62,6 +62,8 @@ int main()
     glm_perspective(glm_rad(45.0f), WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 100.0f, globalProjectionMatrix);
     
     Model* testModel = CreateModel(cubeVerts, sizeof(cubeVerts) / sizeof(float), cubeIndices, sizeof(cubeIndices) / sizeof(unsigned int));
+    Model* secondModel = CreateModel(cubeVerts, sizeof(cubeVerts) / sizeof(float), cubeIndices, sizeof(cubeIndices) / sizeof(unsigned int));
+    MoveModel(secondModel, (vec3){0, 1.0f, 0});
 
     //Shaders
     GLuint vertex_shader = compile_vertex_shader("shaders/vertex_shader.glsl");
@@ -95,13 +97,10 @@ int main()
         vec3 axis = {0.5f, 1.0f, 0.0f};
         RotateModel(testModel, (float)glfwGetTime() * glm_rad(50.0f) * 100, axis);
 
-        mat4 modelMatrix;
-        GetModelMatrix(testModel, modelMatrix);
         mat4 viewMatrix;
         GetViewMatrix(camera, viewMatrix);
 
-        unsigned int modelLoc = glGetUniformLocation(shader_program, "model");
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelMatrix);
+        
 
         unsigned int viewLoc = glGetUniformLocation(shader_program, "view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMatrix[0]);
@@ -113,11 +112,14 @@ int main()
         int vertexColorLocation = glGetUniformLocation(shader_program, "vertexColor");
         glUniform4f(vertexColorLocation, 0.0f, green, 0.0f, 1.0f);
 
-        DrawModel(testModel);
+        DrawModel(testModel, shader_program);
+        DrawModel(secondModel, shader_program);
 
         glfwSwapBuffers(w->skeleton->window);
         glfwPollEvents();
     }
+    FreeModel(testModel);
+    FreeModel(secondModel);
     glfwTerminate();
     return 0;
 }
