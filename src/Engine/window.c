@@ -1,5 +1,5 @@
-#include "../include/gfx/gfx.h"
-#include "../include/gfx/window.h"
+#include "../include/Engine/gfx/gfx.h"
+#include "../include/Engine/gfx/window.h"
 #include "../include/params.h"
 #include <cglm.h>
 

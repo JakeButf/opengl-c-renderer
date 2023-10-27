@@ -3,7 +3,10 @@
 #include <stdio.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "chunk.h"
+#include "../include/chunk.h"
+#include "vao.h"
+#include "vbo.h"
+#include "ebo.h"
 
 typedef struct {
     GLFWwindow *window;

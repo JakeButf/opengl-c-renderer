@@ -10,7 +10,10 @@
                 "-o",
                 "test",
                 "${workspaceFolder}\\src\\main.c",
-                "${workspaceFolder}\\src\\gfx.c",
+                "${workspaceFolder}\\src\\Engine\\gfx.c",
+                "${workspaceFolder}\\src\\Engine\\vao.c",
+                "${workspaceFolder}\\src\\Engine\\vbo.c",
+                "${workspaceFolder}\\src\\Engine\\ebo.c",
                 "${workspaceFolder}\\deps\\GLEW\\lib\\glew32.lib",
                 "${workspaceFolder}\\deps\\GLFW\\lib\\libglfw3.a",
                 "-lOpenGL32",
@@ -22,8 +25,9 @@
                 "-I${workspaceFolder}\\deps\\GLFW\\include",
                 "-I${workspaceFolder}\\deps\\cglm",
                 "-I${workspaceFolder}\\deps",
-                "-I${workspaceFolder}\\include\\",
-                "-I${workspaceFolder}\\include\\gfx"
+                "-I${workspaceFolder}\\deps\\FNL\\include",
+                "-I${workspaceFolder}\\include\\Engine\\",
+                "-I${workspaceFolder}\\include\\Engine\\gfx"
             ],
             "group": {
                 "kind": "build",

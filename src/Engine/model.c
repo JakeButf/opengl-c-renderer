@@ -3,7 +3,7 @@
 #include <string.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "../include/gfx/model.h"
+#include "../include/Engine/gfx/model.h"
 
 Model* CreateModel(const float* vertices, size_t vertexCount, const unsigned int* indices, size_t indexCount) 
 {

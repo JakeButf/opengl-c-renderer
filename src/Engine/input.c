@@ -1,4 +1,4 @@
-#include "../include/input.h"
+#include "../include/Engine/input.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <cglm.h>
@@ -14,7 +14,7 @@ void InitCamera(Camera* camera, vec3 position)
 
     camera->yaw = -90.0f;
     camera->pitch = 0.0f;
-    camera->speed = 2.5f;
+    camera->speed = 20.0f;
     camera->sensitivity = 0.2f;
 }
 

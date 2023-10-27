@@ -1,6 +1,6 @@
-#include "../include/gfx/gfx.h"
+#include "../include/Engine/gfx/gfx.h"
 #include "../include/params.h"
-#include "../include/gfx/window.h"
+#include "../include/Engine/gfx/window.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -137,5 +137,6 @@ void create_window(Skeleton* s)
     if(WIREFRAME)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glDisable(GL_CULL_FACE);
     }
 }

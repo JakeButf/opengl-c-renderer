@@ -1,84 +1,181 @@
-#include "../include/gfx/chunk.h"
+#include "../include/chunk.h"
 #include "cube.c"
-#include "../deps/FastNoiseLite.h"
+#define FNL_IMPL
+#include "FastNoiseLite.h"
 
 Chunk* CreateChunk(vec3 position)
 {
     Chunk* chunk = malloc(sizeof(Chunk));
     glm_vec3_copy(position, chunk->position);
-    
-    for(int x = 0; x < CHUNK_SIZE; x++)
-    {
-        for(int y = 0; y < CHUNK_HEIGHT; y++) //TODO REPLACE WITH NOISE VALUE
-        {
-            for(int z = 0; z < CHUNK_SIZE; z++)
-            {
-                if(y < CHUNK_HEIGHT / 2)
-                {
-                    chunk->blocks[x][y][z].blockID = 1;
-                    chunk->blocks[x][y][z].isVisible = true;
-                } else
-                {
-                    chunk->blocks[x][y][z].blockID = 0;
-                    chunk->blocks[x][y][z].isVisible = false;
-                }
 
-                vec3 blockPos = 
+    chunk->indicesCount = 0;
+    chunk->verticeCount = 0;
+    float* heightNoise = CreateNoise();
+
+    chunk->vertices = malloc(sizeof(GLfloat) * CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT * 16); // Consider adjusting these values as needed.
+    chunk->indices = malloc(sizeof(GLuint) * CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT * 25);
+
+    glGenVertexArrays(1, &chunk->vao);
+    glGenBuffers(1, &chunk->vbo);
+    glGenBuffers(1, &chunk->ebo);
+
+    for (int x = 0; x < CHUNK_SIZE; x++)
+    {
+        for (int y = 0; y < CHUNK_HEIGHT; y++)
+        {
+            for (int z = 0; z < CHUNK_SIZE; z++)
+            {
+                if(y > abs(heightNoise[z * CHUNK_SIZE + x] * (CHUNK_HEIGHT)))
                 {
-                    chunk->position[0] + x,
-                    chunk->position[1] + y,
-                    chunk->position[2] + z
-                };
+                    chunk->blocks[x][y][z].type = AIR;
+                } else 
+                {
+                    chunk->blocks[x][y][z].type = DIRT;
+                }
                 
-                chunk->blocks[x][y][z].model = CreateCubeModel();
-                glm_vec3_copy(blockPos, chunk->blocks[x][y][z].position);
             }
         }
     }
-
     return chunk;
+}
+
+void CreateChunkMesh(Chunk* chunk)
+{
+    for (int x = 0; x < CHUNK_SIZE; x++)
+    {
+        for (int y = 0; y < CHUNK_HEIGHT; y++)
+        {
+            for (int z = 0; z < CHUNK_SIZE; z++)
+            {
+                BlockType currentBlock = chunk->blocks[x][y][z].type;
+
+                if (currentBlock != AIR)
+                {
+                    if (x == CHUNK_SIZE - 1 || chunk->blocks[x + 1][y][z].type == AIR)
+                        AddFace(chunk, x + 1, y, z, DIRECTION_X_POS);
+                    if (x == 0 || chunk->blocks[x - 1][y][z].type == AIR)
+                        AddFace(chunk, x, y, z, DIRECTION_X_NEG);
+                    if (y == CHUNK_HEIGHT - 1 || chunk->blocks[x][y + 1][z].type == AIR)
+                        AddFace(chunk, x, y + 1, z, DIRECTION_Y_POS);
+                    if (y == 0 || chunk->blocks[x][y - 1][z].type == AIR)
+                        AddFace(chunk, x, y, z, DIRECTION_Y_NEG);
+                    if (z == CHUNK_SIZE - 1 || chunk->blocks[x][y][z + 1].type == AIR)
+                        AddFace(chunk, x, y, z + 1, DIRECTION_Z_POS);
+                    if (z == 0 || chunk->blocks[x][y][z - 1].type == AIR)
+                        AddFace(chunk, x, y, z, DIRECTION_Z_NEG);
+                }
+            }
+        }
+    }
+}
+
+void AddFace(Chunk* chunk, int x, int y, int z, FaceDirection faceDirection)
+{
+    GLfloat faceVertices[12];
+    GLuint faceIndices[] = {0, 1, 2, 2, 3, 0};
+
+    switch (faceDirection)
+    {
+    case DIRECTION_X_POS:
+        faceVertices[0] = x;   faceVertices[1] = y;     faceVertices[2] = z;
+        faceVertices[3] = x;   faceVertices[4] = y + 1; faceVertices[5] = z;
+        faceVertices[6] = x;   faceVertices[7] = y + 1; faceVertices[8] = z + 1;
+        faceVertices[9] = x;   faceVertices[10] = y;    faceVertices[11] = z + 1;
+        break;
+
+    case DIRECTION_X_NEG:
+        faceVertices[0] = x - 0; faceVertices[1] = y;     faceVertices[2] = z;
+        faceVertices[3] = x - 0; faceVertices[4] = y + 1; faceVertices[5] = z;
+        faceVertices[6] = x - 0; faceVertices[7] = y + 1; faceVertices[8] = z + 1;
+        faceVertices[9] = x - 0; faceVertices[10] = y;    faceVertices[11] = z + 1;
+        break;
+
+    case DIRECTION_Y_POS:
+        faceVertices[0] = x;     faceVertices[1] = y; faceVertices[2] = z;
+        faceVertices[3] = x + 1; faceVertices[4] = y; faceVertices[5] = z;
+        faceVertices[6] = x + 1; faceVertices[7] = y; faceVertices[8] = z + 1;
+        faceVertices[9] = x;     faceVertices[10] = y; faceVertices[11] = z + 1;
+        break;
+
+    case DIRECTION_Y_NEG:
+        faceVertices[0] = x;     faceVertices[1] = y; faceVertices[2] = z;
+        faceVertices[3] = x + 1; faceVertices[4] = y; faceVertices[5] = z;
+        faceVertices[6] = x + 1; faceVertices[7] = y; faceVertices[8] = z + 1;
+        faceVertices[9] = x;     faceVertices[10] = y; faceVertices[11] = z + 1;
+        break;
+
+    case DIRECTION_Z_POS:
+        faceVertices[0] = x;     faceVertices[1] = y;     faceVertices[2] = z;
+        faceVertices[3] = x;     faceVertices[4] = y + 1; faceVertices[5] = z;
+        faceVertices[6] = x + 1; faceVertices[7] = y + 1; faceVertices[8] = z;
+        faceVertices[9] = x + 1; faceVertices[10] = y;    faceVertices[11] = z;
+        break;
+
+    case DIRECTION_Z_NEG:
+        faceVertices[0] = x;     faceVertices[1] = y;     faceVertices[2] = z;
+        faceVertices[3] = x;     faceVertices[4] = y + 1; faceVertices[5] = z;
+        faceVertices[6] = x + 1; faceVertices[7] = y + 1; faceVertices[8] = z;
+        faceVertices[9] = x + 1; faceVertices[10] = y;    faceVertices[11] = z;
+        break;
+    }
+
+    for (int i = 0; i < 12; i++)
+    {
+        chunk->vertices[chunk->verticeCount + i] = faceVertices[i];
+    }
+
+    for (int i = 0; i < 6; i++)
+    {
+        faceIndices[i] += chunk->verticeCount / 3 - 4;
+    }
+    
+    chunk->verticeCount += 12;
+
+    for (int i = 0; i < 6; i++)
+    {
+        chunk->indices[chunk->indicesCount + i] = faceIndices[i];
+    }
+    chunk->indicesCount += 6;
+
+    glBindVertexArray(chunk->vao);
+    glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo);
+    glBufferData(GL_ARRAY_BUFFER, chunk->verticeCount * sizeof(GLfloat), chunk->vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, chunk->indicesCount * sizeof(GLuint), chunk->indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 void DrawChunk(Chunk* chunk, GLuint shader_program)
 {
-    for(int x = 0; x < CHUNK_SIZE; x++)
-    {
-        for(int y = 0; y < CHUNK_HEIGHT; y++)
-        {
-            for(int z = 0; z < CHUNK_SIZE; z++)
-            {
-                Block* block = &chunk->blocks[x][y][z];
-                
-                mat4 modelMatrix;
-                glm_mat4_identity(modelMatrix);
-                glm_translate(modelMatrix, block->position);
+    if (!chunk || !chunk->vao || chunk->indicesCount == 0)
+        return;
 
-                unsigned int modelLoc = glGetUniformLocation(shader_program, "model");
-                glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelMatrix);
+    glUseProgram(shader_program);
 
-                glBindVertexArray(block->model->VAO);
-                glDrawElements(GL_TRIANGLES, block->model->indexCount, GL_UNSIGNED_INT, 0);
-                glBindVertexArray(0);
+    mat4 matrix;
+    glm_mat4_identity(matrix);
+    glm_translate(matrix, chunk->position);
 
-                //DrawModel(block->model, shader_program);
-            }
-        }
-    }
+    GLint modelLocation = glGetUniformLocation(shader_program, "model");
+    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, matrix[0]);
+
+    glBindVertexArray(chunk->vao);
+    glDrawElements(GL_TRIANGLES, chunk->indicesCount, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 }
 
 void FreeChunk(Chunk* chunk)
 {
-    for(int x = 0; x < CHUNK_SIZE; x++)
-    {
-        for(int y = 0; y < CHUNK_SIZE; y++)
-        {
-            for(int z = 0; z < CHUNK_SIZE; z++)
-            {
-                FreeModel(chunk->blocks[x][y][z].model);
-            }
-        }
-    }
-    free(chunk);
+    free(chunk->vertices);
+    free(chunk->indices);
+    vao_free(&chunk->vao);
+    vbo_free(&chunk->vbo);
+    ebo_free(&chunk->ebo);
 }
 
 Model* CreateCubeModel()
@@ -88,4 +185,19 @@ Model* CreateCubeModel()
 
 float* CreateNoise()
 {
+    fnl_state noise = fnlCreateState(2109);
+    noise.noise_type = FNL_NOISE_OPENSIMPLEX2;
+    
+    float* noiseData = malloc(CHUNK_SIZE * CHUNK_SIZE * sizeof(float));
+    int index = 0;
+
+    for(int y = 0; y < CHUNK_SIZE; y++)
+    {
+        for(int x = 0; x < CHUNK_SIZE; x++)
+        {
+            noiseData[index++] = fnlGetNoise2D(&noise, x, y);
+        }
+    }
+
+    return noiseData;
 }
