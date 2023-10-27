@@ -9,6 +9,7 @@ typedef struct {
     Skeleton* skeleton;
     mat4 view;
     mat4 proj;
+    bool focused;
 }Window;
 
 void InitWindow();

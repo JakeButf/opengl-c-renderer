@@ -5,9 +5,10 @@
 #include "../include/gfx/gfx.h"
 #include "../include/gfx/window.h"
 #include "../include/gfx/model.h"
-#include "window.c";
-#include "cube.c";
+#include "window.c"
+#include "cube.c"
 #include "model.c"
+#include "input.c"
 
 #include <cglm.h>
 
@@ -31,7 +32,6 @@ int main()
     //Create Main OpenGL GLFW Window
     InitWindow();
     create_window(w->skeleton);
-    
 
     if(!w->skeleton->window)
     {
@@ -41,6 +41,8 @@ int main()
     }
 
     glfwMakeContextCurrent(w->skeleton->window);
+    glfwSetCursorPosCallback(w->skeleton->window, mouse_callback);
+    glfwSetInputMode(w->skeleton->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     //Start GL Wrapper
     GLenum error = glewInit();
@@ -75,32 +77,39 @@ int main()
     if(WIREFRAME)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    InitCamera(&camera, (vec3){0.0f, 0.0f, 3.0f});
+    UpdateCameraVectors(&camera);
+
     //Buffer Loop
+    float lastFrame = 0.0f;
     while(!glfwWindowShouldClose(w->skeleton->window))
     {
-        processInput(w->skeleton->window);
+        float currentFrame = glfwGetTime();
+        float deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+        processInput(w->skeleton->window, deltaTime);
         //Render Commands
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(SKYBOX_COLOR_R / 255.0f, SKYBOX_COLOR_G / 255.0f, SKYBOX_COLOR_B / 255.0f, SKYBOX_COLOR_A / 255.0f);
-
-        float time = glfwGetTime();
 
         vec3 axis = {0.5f, 1.0f, 0.0f};
         RotateModel(testModel, (float)glfwGetTime() * glm_rad(50.0f) * 100, axis);
 
         mat4 modelMatrix;
         GetModelMatrix(testModel, modelMatrix);
+        mat4 viewMatrix;
+        GetViewMatrix(camera, viewMatrix);
 
         unsigned int modelLoc = glGetUniformLocation(shader_program, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelMatrix);
 
         unsigned int viewLoc = glGetUniformLocation(shader_program, "view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, w->view[0]);
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMatrix[0]);
 
         unsigned int projLoc = glGetUniformLocation(shader_program, "projection");
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, globalProjectionMatrix);
         
-        float green = sin(time) / 2.0f + 0.5f;
+        float green = sin(deltaTime) / 2.0f + 0.5f;
         int vertexColorLocation = glGetUniformLocation(shader_program, "vertexColor");
         glUniform4f(vertexColorLocation, 0.0f, green, 0.0f, 1.0f);
 
@@ -111,12 +120,4 @@ int main()
     }
     glfwTerminate();
     return 0;
-}
-
-void processInput(GLFWwindow* window)
-{
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    {
-        glfwSetWindowShouldClose(window, 1); //Close window
-    }
 }
