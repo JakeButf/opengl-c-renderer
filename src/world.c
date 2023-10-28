@@ -1,7 +1,7 @@
 #include "../include/world.h"
-#define FNL_IMPL
-#include "FastNoiseLite.h"
+
 #include "chunk.c"
+
 
 World* CreateWorld(int seed)
 {
@@ -17,7 +17,7 @@ World* CreateWorld(int seed)
             {
                 for(int cx = 0; cx < CHUNK_SIZE; cx++)
                 {
-                    int worldIndex = ((z * CHUNK_SIZE + cz) * WORLD_SIZE * CHUNK_SIZE) + (x * CHUNK_SIZE + cz);
+                    int worldIndex = ((z * CHUNK_SIZE + cz) * WORLD_SIZE * CHUNK_SIZE) + (x * CHUNK_SIZE + cx);
                     noise[cz * CHUNK_SIZE + cx] = worldNoise[worldIndex];
                 }
             }
@@ -41,6 +41,7 @@ Chunk* GetChunkAt(World* world, int x, int z)
 
 void DrawWorld(World* world, GLuint shader_program)
 {
+    glUseProgram(shader_program);
     for (int x = 0; x < WORLD_SIZE; x++)
     {
         for(int z = 0; z < WORLD_SIZE; z++)
@@ -63,6 +64,25 @@ void FreeWorld(World* world)
     free(world);
 }
 
+float GetCombinedNoise(fnl_state* noise, float x, float y)
+{
+    float totalNoise = 0;
+    float amp = 0.5f;
+    float frequency = 1.0f;
+    float maxAmplitude = 0.0f;
+
+    for(int i = 0; i < NOISE_OCTAVES; i++)
+    {
+        totalNoise += fnlGetNoise2D(noise, x * frequency, y * frequency) * amp;
+        maxAmplitude += amp;
+
+        amp *= PERSISTENCE;
+        frequency *= 2;
+    }
+
+    return totalNoise / maxAmplitude;
+}
+
 float* GenerateWorldNoise(int seed)
 {
     float* noiseData = malloc(WORLD_SIZE * CHUNK_SIZE * WORLD_SIZE * CHUNK_SIZE * sizeof(float));
@@ -75,7 +95,7 @@ float* GenerateWorldNoise(int seed)
     {
         for(int x = 0; x < WORLD_SIZE * CHUNK_SIZE; x++)
         {
-            noiseData[index++] = fnlGetNoise2D(&noise, x, y);
+            noiseData[index++] = GetCombinedNoise(&noise, x, y);
         }
     }
     return noiseData;

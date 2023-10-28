@@ -134,9 +134,15 @@ void create_window(Skeleton* s)
     s->width = window_width;
     s->height = window_height;
 
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
     if(WIREFRAME)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glDisable(GL_CULL_FACE);
+        //glDisable(GL_CULL_FACE);
     }
 }

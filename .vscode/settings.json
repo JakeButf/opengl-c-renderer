@@ -10,6 +10,7 @@
         "vbo.h": "c",
         "ebo.h": "c",
         "gfx.h": "c",
-        "chunk.h": "c"
+        "chunk.h": "c",
+        "world.h": "c"
     }
 }

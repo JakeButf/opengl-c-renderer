@@ -56,7 +56,6 @@ int main()
         const GLubyte* version = glGetString(GL_VERSION);
         printf("OpenGL Version: %s\n", version);
     }
-    glEnable(GL_DEPTH_TEST);
     //TODO: Relocate window size variables 
     glViewport(0, 0, w->skeleton->width, w->skeleton->height);
     //Bind buffer callback so viewport resizes with window
@@ -79,8 +78,9 @@ int main()
 
     InitCamera(&camera, (vec3){2.0f, CHUNK_HEIGHT, 10.0f});
     UpdateCameraVectors(&camera);
-    
-    World* world = CreateWorld(100);
+    printf("Creating World..");
+    World* world = CreateWorld(10000);
+    printf("World Created. Begun Drawing.");
     //Buffer Loop
     float lastFrame = 0.0f;
     while(!glfwWindowShouldClose(w->skeleton->window))

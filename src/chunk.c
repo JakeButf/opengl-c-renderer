@@ -68,6 +68,17 @@ void CreateChunkMesh(Chunk* chunk)
             }
         }
     }
+    glBindVertexArray(chunk->vao);
+    glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo);
+    glBufferData(GL_ARRAY_BUFFER, chunk->verticeCount * sizeof(GLfloat), chunk->vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, chunk->indicesCount * sizeof(GLuint), chunk->indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 void AddFace(Chunk* chunk, int x, int y, int z, FaceDirection faceDirection)
@@ -137,18 +148,6 @@ void AddFace(Chunk* chunk, int x, int y, int z, FaceDirection faceDirection)
         chunk->indices[chunk->indicesCount + i] = faceIndices[i];
     }
     chunk->indicesCount += 6;
-
-    glBindVertexArray(chunk->vao);
-    glBindBuffer(GL_ARRAY_BUFFER, chunk->vbo);
-    glBufferData(GL_ARRAY_BUFFER, chunk->verticeCount * sizeof(GLfloat), chunk->vertices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, chunk->indicesCount * sizeof(GLuint), chunk->indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }
 
 void DrawChunk(Chunk* chunk, GLuint shader_program)
@@ -156,7 +155,7 @@ void DrawChunk(Chunk* chunk, GLuint shader_program)
     if (!chunk || !chunk->vao || chunk->indicesCount == 0)
         return;
 
-    glUseProgram(shader_program);
+    
 
     mat4 matrix;
     glm_mat4_identity(matrix);
