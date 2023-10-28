@@ -48,12 +48,11 @@ typedef enum
     DIRECTION_Z_NEG,
 }FaceDirection;
 
-Chunk* CreateChunk(vec3 position);
+Chunk* CreateChunk(vec3 position, float* noise);
 void CreateChunkMesh(Chunk* chunk);
 void DrawChunk(Chunk* chunk, GLuint shader_program);
 void FreeChunk(Chunk* chunk);
 Model* CreateCubeModel();
 void AddFace(Chunk* chunk, int x, int y, int z, FaceDirection faceDirection);
-float* CreateNoise();
 
 #endif

@@ -1,16 +1,14 @@
 #include "../include/chunk.h"
 #include "cube.c"
-#define FNL_IMPL
-#include "FastNoiseLite.h"
 
-Chunk* CreateChunk(vec3 position)
+Chunk* CreateChunk(vec3 position, float* worldNoise)
 {
     Chunk* chunk = malloc(sizeof(Chunk));
     glm_vec3_copy(position, chunk->position);
 
     chunk->indicesCount = 0;
     chunk->verticeCount = 0;
-    float* heightNoise = CreateNoise(1000);
+    float* heightNoise = worldNoise;
 
     chunk->vertices = malloc(sizeof(GLfloat) * CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT * 16);
     chunk->indices = malloc(sizeof(GLuint) * CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT * 25);
@@ -38,6 +36,7 @@ Chunk* CreateChunk(vec3 position)
             }
         }
     }
+    CreateChunkMesh(chunk);
     return chunk;
 }
 
@@ -183,24 +182,4 @@ void FreeChunk(Chunk* chunk)
 Model* CreateCubeModel()
 {
     return CreateModel(cubeVerts, sizeof(cubeVerts) / sizeof(float), cubeIndices, sizeof(cubeIndices) / sizeof(unsigned int));
-}
-
-float* CreateNoise(int seed)
-{
-    fnl_state noise = fnlCreateState();
-    noise.seed = seed;
-    noise.noise_type = FNL_NOISE_PERLIN;
-    
-    float* noiseData = malloc(CHUNK_SIZE * CHUNK_SIZE * sizeof(float));
-    int index = 0;
-
-    for(int y = 0; y < CHUNK_SIZE; y++)
-    {
-        for(int x = 0; x < CHUNK_SIZE; x++)
-        {
-            noiseData[index++] = fnlGetNoise2D(&noise, x, y);
-        }
-    }
-
-    return noiseData;
 }

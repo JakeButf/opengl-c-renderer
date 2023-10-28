@@ -10,7 +10,7 @@
 #include "Engine/model.c"
 #include "Engine/input.c"
 
-#include "chunk.c"
+#include "world.c"
 
 #include <cglm.h>
 
@@ -77,11 +77,10 @@ int main()
     if(WIREFRAME)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    InitCamera(&camera, (vec3){2.0f, 3.0f, 10.0f});
+    InitCamera(&camera, (vec3){2.0f, CHUNK_HEIGHT, 10.0f});
     UpdateCameraVectors(&camera);
     
-    Chunk* test = CreateChunk((vec3) {0.0, 0.0, 0.0});
-    CreateChunkMesh(test);
+    World* world = CreateWorld(100);
     //Buffer Loop
     float lastFrame = 0.0f;
     while(!glfwWindowShouldClose(w->skeleton->window))
@@ -110,13 +109,13 @@ int main()
         glUniform4f(vertexColorLocation, 0.0f, green, 0.0f, 1.0f);
 
         //Draw Code Here
-        DrawChunk(test, shader_program);
+        DrawWorld(world, shader_program);
         //
 
         glfwSwapBuffers(w->skeleton->window);
         glfwPollEvents();
     }
-    FreeChunk(test);
+    FreeWorld(world);
     glfwTerminate();
     return 0;
 }
