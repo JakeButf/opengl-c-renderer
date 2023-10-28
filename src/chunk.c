@@ -10,9 +10,9 @@ Chunk* CreateChunk(vec3 position)
 
     chunk->indicesCount = 0;
     chunk->verticeCount = 0;
-    float* heightNoise = CreateNoise();
+    float* heightNoise = CreateNoise(1000);
 
-    chunk->vertices = malloc(sizeof(GLfloat) * CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT * 16); // Consider adjusting these values as needed.
+    chunk->vertices = malloc(sizeof(GLfloat) * CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT * 16);
     chunk->indices = malloc(sizeof(GLuint) * CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT * 25);
 
     glGenVertexArrays(1, &chunk->vao);
@@ -21,11 +21,13 @@ Chunk* CreateChunk(vec3 position)
 
     for (int x = 0; x < CHUNK_SIZE; x++)
     {
-        for (int y = 0; y < CHUNK_HEIGHT; y++)
+        for (int z = 0; z < CHUNK_SIZE; z++)
         {
-            for (int z = 0; z < CHUNK_SIZE; z++)
+            float scaledNoise = (heightNoise[z * CHUNK_SIZE + x] + 1) / 2.0; // map to 0-1
+            float targetHeight = 2 * CHUNK_HEIGHT / 3 + scaledNoise * CHUNK_HEIGHT / 3;
+            for (int y = 0; y < CHUNK_HEIGHT; y++)
             {
-                if(y > abs(heightNoise[z * CHUNK_SIZE + x] * (CHUNK_HEIGHT)))
+                if(y > targetHeight) 
                 {
                     chunk->blocks[x][y][z].type = AIR;
                 } else 
@@ -173,9 +175,9 @@ void FreeChunk(Chunk* chunk)
 {
     free(chunk->vertices);
     free(chunk->indices);
-    vao_free(&chunk->vao);
-    vbo_free(&chunk->vbo);
-    ebo_free(&chunk->ebo);
+    glDeleteBuffers(1, &chunk->vao);
+    glDeleteBuffers(1, &chunk->vbo);
+    glDeleteBuffers(1, &chunk->ebo);
 }
 
 Model* CreateCubeModel()
@@ -183,10 +185,11 @@ Model* CreateCubeModel()
     return CreateModel(cubeVerts, sizeof(cubeVerts) / sizeof(float), cubeIndices, sizeof(cubeIndices) / sizeof(unsigned int));
 }
 
-float* CreateNoise()
+float* CreateNoise(int seed)
 {
-    fnl_state noise = fnlCreateState(2109);
-    noise.noise_type = FNL_NOISE_OPENSIMPLEX2;
+    fnl_state noise = fnlCreateState();
+    noise.seed = seed;
+    noise.noise_type = FNL_NOISE_PERLIN;
     
     float* noiseData = malloc(CHUNK_SIZE * CHUNK_SIZE * sizeof(float));
     int index = 0;

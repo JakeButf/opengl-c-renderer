@@ -77,7 +77,7 @@ int main()
     if(WIREFRAME)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    InitCamera(&camera, (vec3){2.0f, 2.0f, 10.0f});
+    InitCamera(&camera, (vec3){2.0f, 3.0f, 10.0f});
     UpdateCameraVectors(&camera);
     
     Chunk* test = CreateChunk((vec3) {0.0, 0.0, 0.0});
@@ -116,6 +116,7 @@ int main()
         glfwSwapBuffers(w->skeleton->window);
         glfwPollEvents();
     }
+    FreeChunk(test);
     glfwTerminate();
     return 0;
 }
