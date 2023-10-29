@@ -10,8 +10,8 @@ Chunk* CreateChunk(vec3 position, float* worldNoise)
     chunk->verticeCount = 0;
     float* heightNoise = worldNoise;
 
-    chunk->vertices = malloc(sizeof(GLfloat) * CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT * 16);
-    chunk->indices = malloc(sizeof(GLuint) * CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT * 25);
+    chunk->vertices = malloc(sizeof(GLfloat) * CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT * 20 * 15);
+    chunk->indices = malloc(sizeof(GLuint) * CHUNK_SIZE * CHUNK_SIZE * CHUNK_HEIGHT * 6 * 8);
 
     glGenVertexArrays(1, &chunk->vao);
     glGenBuffers(1, &chunk->vbo);
@@ -74,88 +74,148 @@ void CreateChunkMesh(Chunk* chunk)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, chunk->indicesCount * sizeof(GLuint), chunk->indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
-void AddFace(Chunk* chunk, int x, int y, int z, FaceDirection faceDirection)
-{
-    GLfloat faceVertices[12];
+void AddFace(Chunk* chunk, int x, int y, int z, FaceDirection faceDirection) {
+    GLfloat faceVertices[20]; // Vert positions + texture coords
     GLuint faceIndices[] = {0, 1, 2, 2, 3, 0};
 
-    switch (faceDirection)
-    {
+    int tileX = 0;  // For simplicity, using the same texture coordinate for all directions.
+    int tileY = 0;
+    GLfloat tileWidth = 1.0 / 16.0;
+    GLfloat u = tileX * tileWidth;
+    GLfloat v = tileY * tileWidth;
+
+    switch (faceDirection) {
     case DIRECTION_X_POS:
-        faceVertices[0] = x;   faceVertices[1] = y;     faceVertices[2] = z;
-        faceVertices[3] = x;   faceVertices[4] = y + 1; faceVertices[5] = z;
-        faceVertices[6] = x;   faceVertices[7] = y + 1; faceVertices[8] = z + 1;
-        faceVertices[9] = x;   faceVertices[10] = y;    faceVertices[11] = z + 1;
+        // Positive X face (Counter-clockwise)
+        faceVertices[0] = x; faceVertices[1] = y; faceVertices[2] = z;
+        faceVertices[3] = u; faceVertices[4] = v;
+
+        faceVertices[5] = x; faceVertices[6] = y + 1; faceVertices[7] = z;
+        faceVertices[8] = u; faceVertices[9] = v + tileWidth;
+
+        faceVertices[10] = x; faceVertices[11] = y + 1; faceVertices[12] = z + 1;
+        faceVertices[13] = u + tileWidth; faceVertices[14] = v + tileWidth;
+
+        faceVertices[15] = x; faceVertices[16] = y; faceVertices[17] = z + 1;
+        faceVertices[18] = u + tileWidth; faceVertices[19] = v;
         break;
 
     case DIRECTION_X_NEG:
-        faceVertices[0] = x - 0; faceVertices[1] = y;     faceVertices[2] = z;
-        faceVertices[3] = x - 0; faceVertices[4] = y + 1; faceVertices[5] = z;
-        faceVertices[6] = x - 0; faceVertices[7] = y + 1; faceVertices[8] = z + 1;
-        faceVertices[9] = x - 0; faceVertices[10] = y;    faceVertices[11] = z + 1;
+        // Negative X face (Counter-clockwise)
+        faceVertices[0] = x; faceVertices[1] = y + 1; faceVertices[2] = z;
+        faceVertices[3] = u; faceVertices[4] = v;
+
+        faceVertices[5] = x; faceVertices[6] = y; faceVertices[7] = z;
+        faceVertices[8] = u; faceVertices[9] = v + tileWidth;
+
+        faceVertices[10] = x; faceVertices[11] = y; faceVertices[12] = z + 1;
+        faceVertices[13] = u + tileWidth; faceVertices[14] = v + tileWidth;
+
+        faceVertices[15] = x; faceVertices[16] = y + 1; faceVertices[17] = z + 1;
+        faceVertices[18] = u + tileWidth; faceVertices[19] = v;
         break;
 
     case DIRECTION_Y_POS:
-        faceVertices[0] = x;     faceVertices[1] = y; faceVertices[2] = z;
-        faceVertices[3] = x + 1; faceVertices[4] = y; faceVertices[5] = z;
-        faceVertices[6] = x + 1; faceVertices[7] = y; faceVertices[8] = z + 1;
-        faceVertices[9] = x;     faceVertices[10] = y; faceVertices[11] = z + 1;
+        // Top face (Counter-clockwise)
+        faceVertices[0] = x + 1; faceVertices[1] = y + 0; faceVertices[2] = z;
+        faceVertices[3] = u; faceVertices[4] = v;
+
+        faceVertices[5] = x; faceVertices[6] = y + 0; faceVertices[7] = z;
+        faceVertices[8] = u; faceVertices[9] = v + tileWidth;
+
+        faceVertices[10] = x; faceVertices[11] = y + 0; faceVertices[12] = z + 1;
+        faceVertices[13] = u + tileWidth; faceVertices[14] = v + tileWidth;
+
+        faceVertices[15] = x + 1; faceVertices[16] = y + 0; faceVertices[17] = z + 1;
+        faceVertices[18] = u + tileWidth; faceVertices[19] = v;
         break;
 
     case DIRECTION_Y_NEG:
-        faceVertices[0] = x;     faceVertices[1] = y; faceVertices[2] = z;
-        faceVertices[3] = x + 1; faceVertices[4] = y; faceVertices[5] = z;
-        faceVertices[6] = x + 1; faceVertices[7] = y; faceVertices[8] = z + 1;
-        faceVertices[9] = x;     faceVertices[10] = y; faceVertices[11] = z + 1;
-        break;
+        // Bottom face (Counter-clockwise)
+        faceVertices[0] = x; faceVertices[1] = y - 0; faceVertices[2] = z;
+        faceVertices[3] = u; faceVertices[4] = v;
 
-    case DIRECTION_Z_POS:
-        faceVertices[0] = x;     faceVertices[1] = y;     faceVertices[2] = z;
-        faceVertices[3] = x;     faceVertices[4] = y + 1; faceVertices[5] = z;
-        faceVertices[6] = x + 1; faceVertices[7] = y + 1; faceVertices[8] = z;
-        faceVertices[9] = x + 1; faceVertices[10] = y;    faceVertices[11] = z;
+        faceVertices[5] = x + 1; faceVertices[6] = y - 0; faceVertices[7] = z;
+        faceVertices[8] = u; faceVertices[9] = v + tileWidth;
+
+        faceVertices[10] = x + 1; faceVertices[11] = y - 0; faceVertices[12] = z + 1;
+        faceVertices[13] = u + tileWidth; faceVertices[14] = v + tileWidth;
+
+        faceVertices[15] = x; faceVertices[16] = y - 0; faceVertices[17] = z + 1;
+        faceVertices[18] = u + tileWidth; faceVertices[19] = v;
         break;
 
     case DIRECTION_Z_NEG:
-        faceVertices[0] = x;     faceVertices[1] = y;     faceVertices[2] = z;
-        faceVertices[3] = x;     faceVertices[4] = y + 1; faceVertices[5] = z;
-        faceVertices[6] = x + 1; faceVertices[7] = y + 1; faceVertices[8] = z;
-        faceVertices[9] = x + 1; faceVertices[10] = y;    faceVertices[11] = z;
-        break;
-    }
+        // Positive Z face (Counter-clockwise)
+        faceVertices[0] = x + 1; faceVertices[1] = y; faceVertices[2] = z + 0;
+        faceVertices[3] = u; faceVertices[4] = v;
 
-    for (int i = 0; i < 12; i++)
-    {
+        faceVertices[5] = x; faceVertices[6] = y; faceVertices[7] = z + 0;
+        faceVertices[8] = u; faceVertices[9] = v + tileWidth;
+
+        faceVertices[10] = x; faceVertices[11] = y + 1; faceVertices[12] = z + 0;
+        faceVertices[13] = u + tileWidth; faceVertices[14] = v + tileWidth;
+
+        faceVertices[15] = x + 1; faceVertices[16] = y + 1; faceVertices[17] = z + 0;
+        faceVertices[18] = u + tileWidth; faceVertices[19] = v;
+        break;
+
+    case DIRECTION_Z_POS:
+        // Negative Z face (Counter-clockwise)
+        faceVertices[0] = x; faceVertices[1] = y; faceVertices[2] = z - 0;
+        faceVertices[3] = u; faceVertices[4] = v;
+
+        faceVertices[5] = x + 1; faceVertices[6] = y; faceVertices[7] = z - 0;
+        faceVertices[8] = u; faceVertices[9] = v + tileWidth;
+
+        faceVertices[10] = x + 1; faceVertices[11] = y + 1; faceVertices[12] = z - 0;
+        faceVertices[13] = u + tileWidth; faceVertices[14] = v + tileWidth;
+
+        faceVertices[15] = x; faceVertices[16] = y + 1; faceVertices[17] = z - 0;
+        faceVertices[18] = u + tileWidth; faceVertices[19] = v;
+        break;
+}
+
+    for (int i = 0; i < 20; i++) {
         chunk->vertices[chunk->verticeCount + i] = faceVertices[i];
     }
 
-    for (int i = 0; i < 6; i++)
-    {
-        faceIndices[i] += chunk->verticeCount / 3 - 4;
+    GLuint baseIndex = chunk->verticeCount / 5;  // Since we have 3 positions + 2 UVs
+    for (int i = 0; i < 6; i++) {
+        faceIndices[i] += baseIndex;
     }
     
-    chunk->verticeCount += 12;
+    chunk->verticeCount += 20;
 
-    for (int i = 0; i < 6; i++)
-    {
+    for (int i = 0; i < 6; i++) {
         chunk->indices[chunk->indicesCount + i] = faceIndices[i];
     }
     chunk->indicesCount += 6;
+
+    
 }
 
-void DrawChunk(Chunk* chunk, GLuint shader_program)
+
+void DrawChunk(Chunk* chunk, GLuint shader_program, GLuint texture_atlas)
 {
     if (!chunk || !chunk->vao || chunk->indicesCount == 0)
         return;
 
-    
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture_atlas);
+
+    GLint textureLocation = glGetUniformLocation(shader_program, "textureAtlas");
+    glUniform1i(textureLocation, 0);
 
     mat4 matrix;
     glm_mat4_identity(matrix);
@@ -167,6 +227,12 @@ void DrawChunk(Chunk* chunk, GLuint shader_program)
     glBindVertexArray(chunk->vao);
     glDrawElements(GL_TRIANGLES, chunk->indicesCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        printf("OpenGL error: %d\n", err);
+}
 }
 
 void FreeChunk(Chunk* chunk)

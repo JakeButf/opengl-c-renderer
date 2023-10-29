@@ -1,7 +1,11 @@
 #version 460 core
+
 out vec4 FragColor;
-in vec3 vertexColor; // input variable from vs (same name and type)
+in vec2 TexCoord;
+
+uniform sampler2D textureAtlas;
+
 void main()
 {
-    FragColor = vec4(vertexColor, 1.0);
+    FragColor = texture(textureAtlas, TexCoord);
 }

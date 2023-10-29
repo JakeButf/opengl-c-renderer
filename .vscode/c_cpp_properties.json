@@ -7,7 +7,8 @@
                 "${workspaceFolder}\\deps\\GLEW\\include",
                 "${workspaceFolder}\\deps\\GLFW\\include",
                 "${workspaceFolder}\\deps\\cglm\\",
-                "${workspaceFolder}\\deps\\FNL\\include"
+                "${workspaceFolder}\\deps\\FNL\\include",
+                "${workspaceFolder}\\deps\\STB\\include"
                 
             ],
             "defines": [

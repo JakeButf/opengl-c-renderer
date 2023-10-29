@@ -73,14 +73,24 @@ int main()
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
 
-    if(WIREFRAME)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
     InitCamera(&camera, (vec3){2.0f, CHUNK_HEIGHT, 10.0f});
     UpdateCameraVectors(&camera);
+
+    GLuint textureAtlas = load_texture_atlas("block-atlas.png");
+
     printf("Creating World..");
+
     World* world = CreateWorld(10000);
+
     printf("World Created. Begun Drawing.");
+    //Depth Testing
+    //This has to be here bc idk, it was in window create in gfx.c before but it just wasnt working lol
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glfwWindowHint(GLFW_DEPTH_BITS, 24);
     //Buffer Loop
     float lastFrame = 0.0f;
     while(!glfwWindowShouldClose(w->skeleton->window))
@@ -109,7 +119,7 @@ int main()
         glUniform4f(vertexColorLocation, 0.0f, green, 0.0f, 1.0f);
 
         //Draw Code Here
-        DrawWorld(world, shader_program);
+        DrawWorld(world, shader_program, textureAtlas);
         //
 
         glfwSwapBuffers(w->skeleton->window);

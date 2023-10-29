@@ -39,14 +39,14 @@ Chunk* GetChunkAt(World* world, int x, int z)
     return world->chunks[x][z];
 }
 
-void DrawWorld(World* world, GLuint shader_program)
+void DrawWorld(World* world, GLuint shader_program, GLuint texture_atlas)
 {
     glUseProgram(shader_program);
     for (int x = 0; x < WORLD_SIZE; x++)
     {
         for(int z = 0; z < WORLD_SIZE; z++)
         {
-            DrawChunk(world->chunks[x][z], shader_program);
+            DrawChunk(world->chunks[x][z], shader_program, texture_atlas);
         }
     }
 }

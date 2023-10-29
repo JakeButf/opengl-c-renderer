@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 GLuint compile_vertex_shader(const char* shaderSource)
 {
@@ -122,6 +124,27 @@ char* loadShaderSource(const char* filepath)
     return source;
 }
 
+GLuint load_texture_atlas(const char* imageSource)
+{
+    int width, height, channels;
+    unsigned char* data = stbi_load(imageSource, &width, &height, &channels, 0);
+    if(!data)
+    {
+        fprintf(stderr, "Couldn't load texture atlas\n");
+        return 0;
+    }
+
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    stbi_image_free(data);
+    return textureID;
+}
+
 void create_window(Skeleton* s)
 {
     int window_width = WINDOW_WIDTH;
@@ -134,11 +157,8 @@ void create_window(Skeleton* s)
     s->width = window_width;
     s->height = window_height;
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    //glDisable(GL_CULL_FACE);
 
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
 
     if(WIREFRAME)
     {

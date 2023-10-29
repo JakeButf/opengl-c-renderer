@@ -26,6 +26,7 @@
                 "-I${workspaceFolder}\\deps\\cglm",
                 "-I${workspaceFolder}\\deps",
                 "-I${workspaceFolder}\\deps\\FNL\\include",
+                "-I${workspaceFolder}\\deps\\STB\\include",
                 "-I${workspaceFolder}\\include\\Engine\\",
                 "-I${workspaceFolder}\\include\\Engine\\gfx"
             ],
