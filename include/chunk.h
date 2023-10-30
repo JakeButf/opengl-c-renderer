@@ -14,7 +14,9 @@ typedef enum
 {
     AIR,
     DIRT,
-    GRASS
+    GRASS,
+    MOLLY,
+    WATER
 }BlockType;
 
 typedef struct 
@@ -27,6 +29,14 @@ typedef struct
 
 typedef struct
 {
+    char name[5];
+    BlockType topBlock;
+    bool genLakes;
+    bool rare; //0-100
+}Biome;
+
+typedef struct
+{
     Block blocks[CHUNK_SIZE][CHUNK_HEIGHT][CHUNK_SIZE];
     vec3 position;
     int verticeCount;
@@ -36,6 +46,7 @@ typedef struct
     GLuint vao;
     GLuint vbo;
     GLuint ebo;
+    Biome* biome;
 }Chunk;
 
 typedef enum
@@ -48,6 +59,7 @@ typedef enum
     DIRECTION_Z_NEG,
 }FaceDirection;
 
+
 Chunk* CreateChunk(vec3 position, float* noise);
 void CreateChunkMesh(Chunk* chunk);
 void DrawChunk(Chunk* chunk, GLuint shader_program, GLuint texture_atlas);
@@ -55,5 +67,11 @@ void FreeChunk(Chunk* chunk);
 Model* CreateCubeModel();
 void AddFace(Chunk* chunk, int x, int y, int z, FaceDirection faceDirection);
 int* GetTextureFromAtlas(BlockType type);
+Biome* GetNewBiome();
+void CreateBiomes();
+Biome* CreateBiome(char name[4], BlockType grassBlock, bool generateLakes, bool rare);
+Biome* GetBiomeFromName(char name[4]);
+void DoChunkInfo(Biome* biome);
+void FreeBiomes();
 
 #endif

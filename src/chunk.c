@@ -1,10 +1,13 @@
 #include "../include/chunk.h"
 #include "cube.c"
 
+extern float GenerateLakeNoise(fnl_state* noise, float x, float y);
+
 Chunk* CreateChunk(vec3 position, float* worldNoise)
 {
     Chunk* chunk = malloc(sizeof(Chunk));
     glm_vec3_copy(position, chunk->position);
+    chunk->biome = GetNewBiome();
 
     chunk->indicesCount = 0;
     chunk->verticeCount = 0;
@@ -22,12 +25,13 @@ Chunk* CreateChunk(vec3 position, float* worldNoise)
         for (int z = 0; z < CHUNK_SIZE; z++)
         {
             float scaledNoise = (heightNoise[z * CHUNK_SIZE + x] + 1) / 2.0; // map to 0-1
-            float targetHeight = 2 * CHUNK_HEIGHT / 3 + scaledNoise * CHUNK_HEIGHT / 3;
+            float targetHeight = CHUNK_HEIGHT / 3 + scaledNoise * CHUNK_HEIGHT / 2;
+
             for (int y = 0; y < CHUNK_HEIGHT; y++)
             {
                 if(y == (int)targetHeight)
                 {
-                    chunk->blocks[x][y][z].type = GRASS;
+                    chunk->blocks[x][y][z].type = chunk->biome->topBlock;
                 }
                 else if(y > targetHeight) 
                 {
@@ -40,6 +44,24 @@ Chunk* CreateChunk(vec3 position, float* worldNoise)
             }
         }
     }
+    //Lake Gen
+    if(chunk->biome->genLakes)
+    {
+        for (int x = 0; x < CHUNK_SIZE; x++)
+        {
+            for (int z = 0; z < CHUNK_SIZE; z++)
+            {
+                for (int y = 0; y <= SEALEVEL; y++)
+                {
+                    if (chunk->blocks[x][y][z].type == AIR && (y == CHUNK_HEIGHT - 1 || chunk->blocks[x][y+1][z].type == AIR || chunk->blocks[x][y+1][z].type == WATER))
+                    {
+                        chunk->blocks[x][y][z].type = WATER;
+                    }
+                }
+            }
+        }
+    }
+
     CreateChunkMesh(chunk);
     return chunk;
 }
@@ -289,6 +311,18 @@ int* GetTextureFromAtlas(BlockType type)
             returnArr[2] = 1;
             returnArr[3] = 0;
             break;
+        case MOLLY:
+            returnArr[0] = 2;
+            returnArr[1] = 0;
+            returnArr[2] = 2;
+            returnArr[3] = 0;
+            break;
+        case WATER:
+            returnArr[0] = 3;
+            returnArr[1] = 0;
+            returnArr[2] = 3;
+            returnArr[3] = 0;
+            break;
         case AIR:
             break;
         default:
@@ -297,6 +331,61 @@ int* GetTextureFromAtlas(BlockType type)
 
     }
     return returnArr;
+}
+void DoChunkInfo(Biome* biome)
+{
+
+}
+///
+///BIOMES
+///
+static Biome** biomes;
+unsigned int biomeListSize;
+Biome* GetNewBiome()
+{
+    float rng = (float)rand() / (float) RAND_MAX;
+    if(rng < .95)
+    {
+        return GetBiomeFromName("PLNS");
+    } else 
+    {
+        return GetBiomeFromName("MLLY");
+    }
+}
+
+void CreateBiomes()
+{
+    biomeListSize = 2;
+    biomes = malloc(biomeListSize * sizeof(Biome*));
+    biomes[0] = CreateBiome("PLNS", GRASS, true, false);
+    biomes[1] = CreateBiome("MLLY", MOLLY, true, true);
+}
+
+Biome* CreateBiome(char name[4], BlockType grassBlock, bool generateLakes, bool rare)
+{
+    Biome *biome = malloc(sizeof(Biome));
+    strncpy(biome->name, name, 4);
+    biome->topBlock = grassBlock;
+    biome->genLakes = generateLakes;
+    biome->rare = rare;
+    return biome;
+}
+
+Biome* GetBiomeFromName(char name[4])
+{
+    for(int i = 0; i < biomeListSize; i++)
+    {
+        if(strncmp(biomes[i]->name, name, 4) == 0)
+        {
+            return biomes[i];
+        }
+    }
+    return NULL;
+}
+
+void FreeBiomes()
+{
+    free(biomes);
 }
 
 Model* CreateCubeModel()
