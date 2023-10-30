@@ -54,5 +54,6 @@ void DrawChunk(Chunk* chunk, GLuint shader_program, GLuint texture_atlas);
 void FreeChunk(Chunk* chunk);
 Model* CreateCubeModel();
 void AddFace(Chunk* chunk, int x, int y, int z, FaceDirection faceDirection);
+int* GetTextureFromAtlas(BlockType type);
 
 #endif

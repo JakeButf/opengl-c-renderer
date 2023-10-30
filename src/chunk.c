@@ -25,7 +25,11 @@ Chunk* CreateChunk(vec3 position, float* worldNoise)
             float targetHeight = 2 * CHUNK_HEIGHT / 3 + scaledNoise * CHUNK_HEIGHT / 3;
             for (int y = 0; y < CHUNK_HEIGHT; y++)
             {
-                if(y > targetHeight) 
+                if(y == (int)targetHeight)
+                {
+                    chunk->blocks[x][y][z].type = GRASS;
+                }
+                else if(y > targetHeight) 
                 {
                     chunk->blocks[x][y][z].type = AIR;
                 } else
@@ -88,24 +92,31 @@ void AddFace(Chunk* chunk, int x, int y, int z, FaceDirection faceDirection) {
     GLfloat faceVertices[20]; // Vert positions + texture coords
     GLuint faceIndices[] = {0, 1, 2, 2, 3, 0};
     
-    int tileX = 0;  // For simplicity, using the same texture coordinate for all directions.
+    
+    int tileX = 0;
     int tileY = 0;
-    if (x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_HEIGHT && z >= 0 && z < CHUNK_SIZE) {
-        switch(chunk->blocks[x][y][z].type)
+
+    //Check for index oob
+    if (x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_HEIGHT && z >= 0 && z < CHUNK_SIZE) 
+    {
+        int *textCoords = GetTextureFromAtlas(chunk->blocks[x][y][z].type);
+        switch(faceDirection)
         {
-            case DIRT:
-                tileX = 0;
-                tileY = 0;
+            case DIRECTION_X_POS:
+            case DIRECTION_X_NEG:
+            case DIRECTION_Z_NEG:
+            case DIRECTION_Z_POS:
+                tileX = *textCoords;
+                tileY = *(textCoords + 1);
                 break;
-            case GRASS:
-                tileX = 1;
-                tileY = 0;
+            case DIRECTION_Y_NEG:
+            case DIRECTION_Y_POS:
+                tileX = *(textCoords + 2);
+                tileY = *(textCoords + 3);
                 break;
-            case AIR:
-                tileX = 1;
-                tileY = 0;
         }
     }
+    
 
     GLfloat tileWidth = 1.0 / 16.0;
     GLfloat u = tileX * tileWidth;
@@ -259,6 +270,33 @@ void FreeChunk(Chunk* chunk)
     glDeleteBuffers(1, &chunk->vao);
     glDeleteBuffers(1, &chunk->vbo);
     glDeleteBuffers(1, &chunk->ebo);
+}
+
+int* GetTextureFromAtlas(BlockType type)
+{
+    static int returnArr[4]; //XTileAtlasX, XTileAtlasY, YTileAtlasX, YTileAtlasY
+    switch(type)
+    {
+        case DIRT:
+            returnArr[0] = 0;
+            returnArr[1] = 0;
+            returnArr[2] = 0;
+            returnArr[3] = 0;
+            break;
+        case GRASS:
+            returnArr[0] = 0;
+            returnArr[1] = 0;
+            returnArr[2] = 1;
+            returnArr[3] = 0;
+            break;
+        case AIR:
+            break;
+        default:
+            fprintf(stderr, "Block of type does not have an assigned atlas location.\n");
+            break;
+
+    }
+    return returnArr;
 }
 
 Model* CreateCubeModel()
