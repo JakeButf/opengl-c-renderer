@@ -28,7 +28,7 @@ Chunk* CreateChunk(vec3 position, float* worldNoise)
                 if(y > targetHeight) 
                 {
                     chunk->blocks[x][y][z].type = AIR;
-                } else 
+                } else
                 {
                     chunk->blocks[x][y][z].type = DIRT;
                 }
@@ -53,15 +53,15 @@ void CreateChunkMesh(Chunk* chunk)
                 if (currentBlock != AIR)
                 {
                     if (x == CHUNK_SIZE - 1 || chunk->blocks[x + 1][y][z].type == AIR)
-                        AddFace(chunk, x + 1, y, z, DIRECTION_X_POS);
+                        AddFace(chunk, x, y, z, DIRECTION_X_POS);
                     if (x == 0 || chunk->blocks[x - 1][y][z].type == AIR)
                         AddFace(chunk, x, y, z, DIRECTION_X_NEG);
                     if (y == CHUNK_HEIGHT - 1 || chunk->blocks[x][y + 1][z].type == AIR)
-                        AddFace(chunk, x, y + 1, z, DIRECTION_Y_POS);
+                        AddFace(chunk, x, y, z, DIRECTION_Y_POS);
                     if (y == 0 || chunk->blocks[x][y - 1][z].type == AIR)
                         AddFace(chunk, x, y, z, DIRECTION_Y_NEG);
                     if (z == CHUNK_SIZE - 1 || chunk->blocks[x][y][z + 1].type == AIR)
-                        AddFace(chunk, x, y, z + 1, DIRECTION_Z_POS);
+                        AddFace(chunk, x, y, z, DIRECTION_Z_POS);
                     if (z == 0 || chunk->blocks[x][y][z - 1].type == AIR)
                         AddFace(chunk, x, y, z, DIRECTION_Z_NEG);
                 }
@@ -87,9 +87,26 @@ void CreateChunkMesh(Chunk* chunk)
 void AddFace(Chunk* chunk, int x, int y, int z, FaceDirection faceDirection) {
     GLfloat faceVertices[20]; // Vert positions + texture coords
     GLuint faceIndices[] = {0, 1, 2, 2, 3, 0};
-
+    
     int tileX = 0;  // For simplicity, using the same texture coordinate for all directions.
     int tileY = 0;
+    if (x >= 0 && x < CHUNK_SIZE && y >= 0 && y < CHUNK_HEIGHT && z >= 0 && z < CHUNK_SIZE) {
+        switch(chunk->blocks[x][y][z].type)
+        {
+            case DIRT:
+                tileX = 0;
+                tileY = 0;
+                break;
+            case GRASS:
+                tileX = 1;
+                tileY = 0;
+                break;
+            case AIR:
+                tileX = 1;
+                tileY = 0;
+        }
+    }
+
     GLfloat tileWidth = 1.0 / 16.0;
     GLfloat u = tileX * tileWidth;
     GLfloat v = tileY * tileWidth;
@@ -97,17 +114,17 @@ void AddFace(Chunk* chunk, int x, int y, int z, FaceDirection faceDirection) {
     switch (faceDirection) {
     case DIRECTION_X_POS:
         // Positive X face (Counter-clockwise)
-        faceVertices[0] = x; faceVertices[1] = y; faceVertices[2] = z;
-        faceVertices[3] = u; faceVertices[4] = v;
+        faceVertices[0] = x + 1; faceVertices[1] = y; faceVertices[2] = z;
+        faceVertices[3] = u; faceVertices[4] = v + tileWidth;
 
-        faceVertices[5] = x; faceVertices[6] = y + 1; faceVertices[7] = z;
-        faceVertices[8] = u; faceVertices[9] = v + tileWidth;
+        faceVertices[5] = x + 1; faceVertices[6] = y + 1; faceVertices[7] = z;
+        faceVertices[8] = u; faceVertices[9] = v;
 
-        faceVertices[10] = x; faceVertices[11] = y + 1; faceVertices[12] = z + 1;
-        faceVertices[13] = u + tileWidth; faceVertices[14] = v + tileWidth;
+        faceVertices[10] = x + 1; faceVertices[11] = y + 1; faceVertices[12] = z + 1;
+        faceVertices[13] = u + tileWidth; faceVertices[14] = v;
 
-        faceVertices[15] = x; faceVertices[16] = y; faceVertices[17] = z + 1;
-        faceVertices[18] = u + tileWidth; faceVertices[19] = v;
+        faceVertices[15] = x + 1; faceVertices[16] = y; faceVertices[17] = z + 1;
+        faceVertices[18] = u + tileWidth; faceVertices[19] = v + tileWidth;
         break;
 
     case DIRECTION_X_NEG:
@@ -127,32 +144,32 @@ void AddFace(Chunk* chunk, int x, int y, int z, FaceDirection faceDirection) {
 
     case DIRECTION_Y_POS:
         // Top face (Counter-clockwise)
-        faceVertices[0] = x + 1; faceVertices[1] = y + 0; faceVertices[2] = z;
-        faceVertices[3] = u; faceVertices[4] = v;
+        faceVertices[0] = x + 1; faceVertices[1] = y + 1; faceVertices[2] = z;
+        faceVertices[3] = u; faceVertices[4] = v  + tileWidth;
 
-        faceVertices[5] = x; faceVertices[6] = y + 0; faceVertices[7] = z;
-        faceVertices[8] = u; faceVertices[9] = v + tileWidth;
+        faceVertices[5] = x; faceVertices[6] = y + 1; faceVertices[7] = z;
+        faceVertices[8] = u; faceVertices[9] = v ;
 
-        faceVertices[10] = x; faceVertices[11] = y + 0; faceVertices[12] = z + 1;
-        faceVertices[13] = u + tileWidth; faceVertices[14] = v + tileWidth;
+        faceVertices[10] = x; faceVertices[11] = y + 1; faceVertices[12] = z + 1;
+        faceVertices[13] = u + tileWidth; faceVertices[14] = v;
 
-        faceVertices[15] = x + 1; faceVertices[16] = y + 0; faceVertices[17] = z + 1;
-        faceVertices[18] = u + tileWidth; faceVertices[19] = v;
+        faceVertices[15] = x + 1; faceVertices[16] = y + 1; faceVertices[17] = z + 1;
+        faceVertices[18] = u + tileWidth; faceVertices[19] = v  + tileWidth;
         break;
 
     case DIRECTION_Y_NEG:
         // Bottom face (Counter-clockwise)
         faceVertices[0] = x; faceVertices[1] = y - 0; faceVertices[2] = z;
-        faceVertices[3] = u; faceVertices[4] = v;
+        faceVertices[3] = u; faceVertices[4] = v + tileWidth;
 
         faceVertices[5] = x + 1; faceVertices[6] = y - 0; faceVertices[7] = z;
-        faceVertices[8] = u; faceVertices[9] = v + tileWidth;
+        faceVertices[8] = u; faceVertices[9] = v;
 
         faceVertices[10] = x + 1; faceVertices[11] = y - 0; faceVertices[12] = z + 1;
-        faceVertices[13] = u + tileWidth; faceVertices[14] = v + tileWidth;
+        faceVertices[13] = u + tileWidth; faceVertices[14] = v;
 
         faceVertices[15] = x; faceVertices[16] = y - 0; faceVertices[17] = z + 1;
-        faceVertices[18] = u + tileWidth; faceVertices[19] = v;
+        faceVertices[18] = u + tileWidth; faceVertices[19] = v  + tileWidth;
         break;
 
     case DIRECTION_Z_NEG:
@@ -172,16 +189,16 @@ void AddFace(Chunk* chunk, int x, int y, int z, FaceDirection faceDirection) {
 
     case DIRECTION_Z_POS:
         // Negative Z face (Counter-clockwise)
-        faceVertices[0] = x; faceVertices[1] = y; faceVertices[2] = z - 0;
+        faceVertices[0] = x; faceVertices[1] = y; faceVertices[2] = z + 1;
         faceVertices[3] = u; faceVertices[4] = v;
 
-        faceVertices[5] = x + 1; faceVertices[6] = y; faceVertices[7] = z - 0;
+        faceVertices[5] = x + 1; faceVertices[6] = y; faceVertices[7] = z + 1;
         faceVertices[8] = u; faceVertices[9] = v + tileWidth;
 
-        faceVertices[10] = x + 1; faceVertices[11] = y + 1; faceVertices[12] = z - 0;
+        faceVertices[10] = x + 1; faceVertices[11] = y + 1; faceVertices[12] = z + 1;
         faceVertices[13] = u + tileWidth; faceVertices[14] = v + tileWidth;
 
-        faceVertices[15] = x; faceVertices[16] = y + 1; faceVertices[17] = z - 0;
+        faceVertices[15] = x; faceVertices[16] = y + 1; faceVertices[17] = z + 1;
         faceVertices[18] = u + tileWidth; faceVertices[19] = v;
         break;
 }
