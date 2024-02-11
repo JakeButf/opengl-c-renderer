@@ -2,13 +2,13 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "build for Windows",
             "type": "shell",
             "command": "gcc",
             "args": [
                 "-g",
                 "-o",
-                "test",
+                "test.exe",
                 "${workspaceFolder}\\src\\main.c",
                 "${workspaceFolder}\\src\\Engine\\gfx.c",
                 "${workspaceFolder}\\deps\\GLEW\\lib\\glew32.lib",
@@ -31,12 +31,70 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": []
+            "problemMatcher": [],
+            "windows": {
+                "options": {
+                    "shell": {
+                        "executable": "cmd.exe",
+                        "args": ["/d", "/c"]
+                    }
+                }
+            }
         },
         {
-            "type": "cppbuild",
+            "label": "Echo Workspace Folder",
+            "type": "shell",
+            "command": "echo Workspace Folder is ${workspaceFolder}"
+        },
+        {
+            "label": "build for Mac",
+            "type": "shell",
+            "command": "clang",
+            "args": [
+                "-g",
+                "-o",
+                "test",
+                "${workspaceFolder}/src/main.c",
+                "${workspaceFolder}/src/Engine/gfx.c",
+                // Specify macOS specific libraries and paths here
+                "-framework", "OpenGL",
+                "-lGLEW",
+                "-lglfw",
+                // ... other macOS specific args
+                "-I${workspaceFolder}/include",
+                "-I${workspaceFolder}/deps/GLEW/include",
+                "-I${workspaceFolder}/deps/GLFW/include",
+                "-I${workspaceFolder}/include",
+                "-I${workspaceFolder}/deps/GLEW/include",
+                "-I${workspaceFolder}/deps/GLFW/include",
+                "-I${workspaceFolder}/deps/cglm",
+                "-I${workspaceFolder}/deps",
+                "-I${workspaceFolder}/deps/FNL/include",
+                "-I${workspaceFolder}/deps/STB/include",
+                "-I${workspaceFolder}/include/Engine/",
+                "-I${workspaceFolder}/include/Engine/gfx",
+                "&&", "chmod", "+x", "${workspaceFolder}/test"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "osx": {
+                "options": {
+                    "shell": {
+                        "executable": "/bin/bash",
+                        "args": ["-c"]
+                    }
+                }
+            }
+        },
+        {
             "label": "C/C++: gcc.exe build active file",
-            "command": "D:\\msys2\\mingw64\\bin\\gcc.exe",
+            "type": "cppbuild",
+            "command": "gcc",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",

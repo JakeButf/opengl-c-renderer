@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug",
+            "name": "Debug on Windows",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}\\test",
@@ -20,10 +20,20 @@
                 }
             ],
             "miDebuggerPath": "gdb",
-            "preLaunchTask": "build"
+            "preLaunchTask": "build for Windows"
         },
         {
-            "name": "C/C++: gcc.exe build and debug active file",
+            "name": "Debug on Mac",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/test",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "MIMode": "lldb",
+            "preLaunchTask": "build for Mac"
+        },
+        {
+            "name": "C/C++: gcc.exe build and debug active file on Windows",
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
@@ -48,5 +58,6 @@
             ],
             "preLaunchTask": "C/C++: gcc.exe build active file"
         }
+        // Add other configurations if needed
     ]
 }

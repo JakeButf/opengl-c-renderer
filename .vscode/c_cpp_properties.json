@@ -9,7 +9,6 @@
                 "${workspaceFolder}\\deps\\cglm\\",
                 "${workspaceFolder}\\deps\\FNL\\include",
                 "${workspaceFolder}\\deps\\STB\\include"
-                
             ],
             "defines": [
                 "_DEBUG",
@@ -21,6 +20,26 @@
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "${default}"
+        },
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/deps/GLEW/include",
+                "${workspaceFolder}/deps/GLFW/include",
+                "${workspaceFolder}/deps/cglm/",
+                "${workspaceFolder}/deps/FNL/include",
+                "${workspaceFolder}/deps/STB/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64"
         }
     ],
     "version": 4
