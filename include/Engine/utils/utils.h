@@ -7,7 +7,7 @@ struct iVector2
 {
     int x;
     int y;
-};
+}; 
 
 //Returns random integer between 0 and arg max
 int randint(int max)

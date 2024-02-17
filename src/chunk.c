@@ -99,9 +99,11 @@ Chunk* CreateChunk(vec3 position, float* worldNoise)
                                 if(chunk->blocks[potentialX][y][potentialZ].type == AIR && (y == CHUNK_HEIGHT - 1 || chunk->blocks[potentialX][y+1][potentialZ].type == AIR))
                                 {
                                     chunk->blocks[potentialX][y][potentialZ].type = WOODLOG;
-                                    chunk->blocks[potentialX][y + 1][potentialZ].type = WOODLOG;
-                                    chunk->blocks[potentialX][y + 2][potentialZ].type = WOODLOG;
-                                    chunk->blocks[potentialX][y + 3][potentialZ].type = WOODLOG;
+                                    int heightMod = randint(2);
+                                    for(int u = 0; u < 3 + heightMod; u++)
+                                    {
+                                        chunk->blocks[potentialX][y + u][potentialZ].type = WOODLOG;
+                                    }
                                     break;
                                 }
                             }
