@@ -2,6 +2,7 @@
 #define CHUNK_H
 #define CHUNK_SIZE 16
 #define CHUNK_HEIGHT 256
+#define CHUNK_GEN_TREES 1
 #include <stdio.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -16,7 +17,8 @@ typedef enum
     DIRT,
     GRASS,
     MOLLY,
-    WATER
+    WATER,
+    WOODLOG
 }BlockType;
 
 typedef struct 

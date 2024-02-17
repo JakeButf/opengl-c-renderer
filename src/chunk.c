@@ -1,4 +1,5 @@
 #include "../include/chunk.h"
+#include "../include/Engine/utils/utils.h"
 #include "cube.c"
 
 extern float GenerateLakeNoise(fnl_state* noise, float x, float y);
@@ -56,6 +57,59 @@ Chunk* CreateChunk(vec3 position, float* worldNoise)
                     if (chunk->blocks[x][y][z].type == AIR && (y == CHUNK_HEIGHT - 1 || chunk->blocks[x][y+1][z].type == AIR || chunk->blocks[x][y+1][z].type == WATER))
                     {
                         chunk->blocks[x][y][z].type = WATER;
+                    }
+                }
+            }
+        }
+    }
+    //Tree Gen
+    if(CHUNK_GEN_TREES == 1)
+    {
+        if(chunk->biome->topBlock == GRASS) //Only generate tree's if grass is the top block
+        {
+            int r = randint(4);
+            if(r != 4) 
+            {
+                //Generate Tree's
+                r = randint(20);
+                int* placedTrees = malloc(r * sizeof(int));
+                int potentialX;
+                int potentialZ;
+                for(int i = 0; i < r; i++)
+                {
+                    if(r != 0)
+                    {
+                        potentialX = randint(CHUNK_SIZE);
+                        potentialZ = randint(CHUNK_SIZE);
+                        int concat = potentialX * 10 + potentialZ;
+                        int t = 0;
+                        for(t = 0; t < r; t++)
+                        {
+                            if(t == concat)
+                            {
+                                t = r + 1;
+                                break;
+                            }
+                        }
+                        if(t == r + 1)
+                        {
+                            //Generate Tree
+                            for(int y = 0; y < CHUNK_HEIGHT; y++)
+                            {
+                                if(chunk->blocks[potentialX][y][potentialZ].type == AIR && (y == CHUNK_HEIGHT - 1 || chunk->blocks[potentialX][y+1][potentialZ].type == AIR))
+                                {
+                                    chunk->blocks[potentialX][y][potentialZ].type = WOODLOG;
+                                    chunk->blocks[potentialX][y + 1][potentialZ].type = WOODLOG;
+                                    chunk->blocks[potentialX][y + 2][potentialZ].type = WOODLOG;
+                                    chunk->blocks[potentialX][y + 3][potentialZ].type = WOODLOG;
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        potentialX = randint(CHUNK_SIZE);
+                        potentialZ = randint(CHUNK_SIZE);
+                        placedTrees[i] = potentialX * 10 + potentialZ;
                     }
                 }
             }
@@ -321,6 +375,12 @@ int* GetTextureFromAtlas(BlockType type)
             returnArr[0] = 3;
             returnArr[1] = 0;
             returnArr[2] = 3;
+            returnArr[3] = 0;
+            break;
+        case WOODLOG:
+            returnArr[0] = 2;
+            returnArr[1] = 0;
+            returnArr[2] = 2;
             returnArr[3] = 0;
             break;
         case AIR:
