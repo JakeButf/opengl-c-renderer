@@ -5,7 +5,7 @@
             "name": "Debug on Windows",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}\\test",
+            "program": "${workspaceFolder}/test",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
