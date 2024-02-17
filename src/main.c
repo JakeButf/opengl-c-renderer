@@ -20,6 +20,14 @@ unsigned int indices[] = {
 };
 //
 
+void processInput(GLFWwindow* window)
+{
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    {
+        glfwSetWindowShouldClose(window, 1); //Close window
+    }
+}
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -122,7 +130,7 @@ int main()
         glClearColor(0, 0, 0, 0);
 
         float time = glfwGetTime();
-        float green = sin(time) / 2.0f + 0.5f;
+        float green = time / 2.0f + 0.5f;
         int vertexColorLocation = glGetUniformLocation(shader_program, "vertexColor");
         glUniform4f(vertexColorLocation, 0.0f, green, 0.0f, 1.0f);
 
@@ -135,12 +143,4 @@ int main()
 
     glfwTerminate();
     return 0;
-}
-
-void processInput(GLFWwindow* window)
-{
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    {
-        glfwSetWindowShouldClose(window, 1); //Close window
-    }
 }
