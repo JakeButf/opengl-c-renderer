@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "cglm.h": "c",
+        "params.h": "c",
+        "glfw3.h": "c",
+        "model.h": "c",
+        "fastnoiselite.h": "c",
+        "window.h": "c",
+        "vao.h": "c",
+        "vbo.h": "c",
+        "ebo.h": "c",
+        "gfx.h": "c",
+        "chunk.h": "c",
+        "world.h": "c"
+    }
+}
